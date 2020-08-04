@@ -6,7 +6,6 @@
 #include <string>
 using namespace std;
 
-//if only one activity,eliminate it
 struct node{
    int es=0,ef=0,lf=INT_MAX,ls,slack,period,afters=0,befores=0;
    string name;
@@ -17,7 +16,7 @@ struct node{
 
 void pre(node* current,int befores,int k,vector<node*> *allnodes);
 void inputhandler(node* a,vector<node*> *allnodes);
-void createoutputfile(vector<node*> *allnodes,vector<vector<node*>> *allpaths,node* x,vector<vector<node*>> *criticalpat,ostream &np,string databasename,string projectname);
+void createoutputfile(vector<node*> *allnodes,vector<vector<node*>> *allpaths,node* x,vector<vector<node*>> *criticalpat,ostream &np,string databasename,string projectname,string unitofdur);
 void inputvalidation(node* c,string s);
 void criticalpath(vector<node*> *allnodes,node* a,vector<vector<node*>> *allpaths,vector<vector<node*>> *criticalpat);
 void checkef(vector<node*> *allnodes);
@@ -33,7 +32,7 @@ string e="Input a valid number of predecessors. If yes,how many ? If no,type 0 :
 
 int main(){
    char b;
-   cout<<"\n\nDisclaimer:\n1)All Project will be created in a table under the current database.\n2)If want to create project into old database,just type the database name(must be same)\n3)Press Enter once done for each prompt\n4)Use underscore instead of spacing\n5)Make sure no similar named sql file in directory before creating a new one\n\n";
+   cout<<"\n\nDisclaimer:\n1)All Project will be created in a table under the current database.\n2)If want to create project into old database,just type the database name(must be same)\n3)Press Enter once done for each prompt\n4)Use underscore instead of spacing\n5)Make sure no similar named sql file in directory before creating a new one\n6)Can't input duration as decimal point,lowest is 1\n\n";
    string databasename;
    b='d';
    while(b=='d'){
@@ -44,6 +43,13 @@ int main(){
         string projectname;
         cout<<"\nProject Name : ";
         cin>>projectname;
+        string unitofdur;
+        cout<<"\nUnit for duration e.g. Months/Days/Hours/Minutes for Project "<<projectname<<": ";
+        cin>>unitofdur;
+        while(!cin.good()){
+            cin>>unitofdur;
+            cout<<"\nPlease input a valid unit of duration : ";
+        }
         vector<node*> *allnodes = new vector<node*>();
         node* a=new node();
         inputhandler(a,allnodes);
@@ -60,10 +66,18 @@ int main(){
                 if(output=='e'){
                     ofstream newproject;
                     newproject.open(projectname+".sql");
-                    createoutputfile(allnodes,allpaths,a,criticalpat,newproject,databasename,projectname);
+                    createoutputfile(allnodes,allpaths,a,criticalpat,newproject,databasename,projectname,unitofdur);
                     newproject.close();}
                 else{
-                    createoutputfile(allnodes,allpaths,a,criticalpat,cout,databasename,projectname);
+                    createoutputfile(allnodes,allpaths,a,criticalpat,cout,databasename,projectname,unitofdur);
+                    cout<<"\n Do you want to save the project in the server?\n";
+                    cin>>output;
+                    output=tolower(output);
+                    if(output=='e'){
+                        ofstream newproject;
+                        newproject.open(projectname+".sql");
+                        createoutputfile(allnodes,allpaths,a,criticalpat,newproject,databasename,projectname,unitofdur);
+                        newproject.close();}
         }}
         cout<<"\nType C to create another new project OR D to create a new database OR anything else to quit: ";
         cin.ignore();
@@ -158,10 +172,10 @@ void pre(node* current,int befores,int k,vector<node*> *allnodes){              
        }
    }
 
-void createoutputfile(vector<node*> *allnodes,vector<vector<node*>> *allpaths,node* x,vector<vector<node*>> *criticalpat,ostream &newproject,string databasename,string projectname){    //can choose to print to terminal or sql file
+void createoutputfile(vector<node*> *allnodes,vector<vector<node*>> *allpaths,node* x,vector<vector<node*>> *criticalpat,ostream &newproject,string databasename,string projectname,string unitofdur){    //can choose to print to terminal or sql file
     if(&newproject==&cout){
         newproject<<"\n\n";
-        newproject<<"Activity\tDuration\tES\tEF\tLS\tLF\tSlack\tFirstnode\tPredecessor\tAfters\n";
+        newproject<<"Activity\tDuration("<<unitofdur<<")\tES("<<unitofdur<<")\tEF("<<unitofdur<<")\tLS("<<unitofdur<<")\tLF\t("<<unitofdur<<")Slack("<<unitofdur<<")\tFirstnode\tPredecessor\tAfters\n";
         for(auto k: *allnodes){
             newproject<<k->name<<"\t\t"<<k->period<<"\t\t"<<k->es<<"\t"<<k->ef<<"\t"<<k->ls<<"\t"<<k->lf<<"\t"<<k->slack<<"\t"<<k->firstnode<<"\t\t";
             for(auto s: k->before){
@@ -178,12 +192,12 @@ void createoutputfile(vector<node*> *allnodes,vector<vector<node*>> *allpaths,no
         printpaths(allpaths,newproject);
         newproject<<"\n"<<"All critical paths : "<<"\n";
         printpaths(criticalpat,newproject);
-        newproject<<"\n"<<"Earliest completion time : "<<x->lf<<"\n";}
+        newproject<<"\n"<<"Earliest completion time in "<<unitofdur<<" : "<<x->lf<<"\n";}
     else{
         newproject<<"CREATE DATABASE IF NOT EXISTS "+databasename+";\n";
         newproject<<"USE "+databasename+";\n";
         newproject<<"CREATE TABLE IF NOT EXISTS "+projectname+"\n";
-        newproject<<"(\n\tActivity varchar(50),\n\tDuration INT,\n\tES INT,\n\tEF INT,\n\tLS INT,\n\tLF INT,\n\tSlack INT,\n\tFirstnode INT,\n\tPredecessor varchar(50),\n\tAfters varchar(50)\n);\n";
+        newproject<<"(\n\tActivity VARCHAR(100),\n\tDuration INT,\n\tEarliest_Start INT,\n\tEarliest_Finish INT,\n\tLatest_Start INT,\n\tLatest_Finish INT,\n\tSlack INT,\n\tFirstnode INT,\n\tPredecessors VARCHAR(100),\n\tActivities_after_current_activity VARCHAR(100),\n\tUnit_of_time VARCHAR(30)\n);\n";
         for(auto k: *allnodes){
             newproject<<"INSERT INTO ";
             newproject<<projectname<<" VALUES(\'"<<k->name<<"\',"<<k->period<<","<<k->es<<","<<k->ef<<","<<k->ls<<","<<k->lf<<","<<k->slack<<","<<k->firstnode<<",";
@@ -216,7 +230,7 @@ void createoutputfile(vector<node*> *allnodes,vector<vector<node*>> *allpaths,no
             else{
                 newproject<<"NULL";
             }
-        newproject<<");\n";
+        newproject<<",\'"<<unitofdur<<"\');\n";
         }
     }
 }
