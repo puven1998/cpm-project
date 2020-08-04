@@ -30,20 +30,20 @@ string l= "\n Input duration of activity ";
 string c="\n Does activity ",d=" has any predecessors ? If yes,how many ? If no,type 0 : ";
 string e="Input a valid number of predecessors. If yes,how many ? If no,type 0 : ";
 
+
 int main(){
    char b;
-   cout<<"Disclaimer::All Project will be created in a table under the current database.\n\nIf want to create project into old database,just type the database name(must be same)\n\n";
+   cout<<"\n\nDisclaimer:\n1)All Project will be created in a table under the current database.\n2)If want to create project into old database,just type the database name(must be same)\n3)Press Enter once done for each prompt\n4)Use underscore instead of spacing\n5)Make sure no similar named sql file in directory before creating a new one\n\n";
    string databasename;
    b='d';
    while(b=='d'){
-    cout<<"\nName of database to save the project?\n";
-    getline(cin,databasename);
+    cout<<"\nName of database to save the project? : ";
+    cin>>databasename;
     b='c';
     while(b=='c'){
         string projectname;
-        cin.ignore();
-        cout<<"\nProject Name: ";
-        getline(cin,projectname);
+        cout<<"\nProject Name : ";
+        cin>>projectname;
         vector<node*> *allnodes = new vector<node*>();
         node* a=new node();
         inputhandler(a,allnodes);
@@ -55,7 +55,6 @@ int main(){
             cout<<"\nProject must have more than one activity.\n";
         }else{
                 cout<<"\nDo you want to export the output to a file for(database storage purpose) or only print it out to terminal? If you want to export,type E. To print out to terminal, type anything else : ";
-                cin.ignore();
                 cin>>output;
                 output=tolower(output);
                 if(output=='e'){
@@ -76,60 +75,61 @@ int main(){
 }
 
 void inputhandler(node* a,vector<node*> *allnodes){                                                                                      //initializes first input prompt
-   cout<<f;
-   cin>>a->name;
-   cout<<l<<a->name<<" :  ";
-   inputvalidation(a,l);
-   allnodes->push_back(a);
-   cout<<c<<a->name<<d;
-   inputvalidation(a,e);
-   int k=1;
-   pre(a,a->befores,k,allnodes);
-   }
+    cout<<f;
+    cin>>a->name;
+    cout<<l<<a->name<<" :  ";
+    inputvalidation(a,l);
+    allnodes->push_back(a);
+    cout<<c<<a->name<<d;
+    inputvalidation(a,e);
+    int k=1;
+    pre(a,a->befores,k,allnodes);
+    }
 
 void pre(node* current,int befores,int k,vector<node*> *allnodes){                                                                       //prompts if an activity has predecessor
-   if(befores==0){
-       current->es=0,current->ef=current->period,current->firstnode=true;
+    if(befores==0){
+        current->es=0,current->ef=current->period,current->firstnode=true;
    }
-   while(befores--){
-       node* b=new node();
-       cout<<" \n Input activity "<<current->name<<"'s \n \t Predecessor -"<<k<<"'s name : ";
-       cin.ignore();
-       cin>>b->name;
-       bool j=false;
-       node* check;
-       for(auto i : *allnodes){if(i->name==b->name){check=i;j=true;break;}}
-       if(j){
-           char p='n';
-           while(j){
-               char a;
-               if(p=='n'){
-                   cout<<"This name is already taken by another activity.\n\nType N to create a new one or type P to accept that it is the same activity :  ";
-                   cin.ignore();
-                   cin>>a;}
-               else{
-                   a='n';
-                   p='n';
-                   }
-               a=tolower(a);
-               if(a=='n'){
-                   cout<<" \n Input activity "<<current->name<<"'s \n \t Predecessor -"<<k<<"'s (New) name : ";
-                   cin.ignore();
-                   cin>>b->name;
-                   j=false;
-                   for(auto i : *allnodes){if(i->name==b->name){check=i;j=true;p='n';break;}}
-                   if(!j){
-                       cout<<" \t Duration : ";
-                       inputvalidation(b,l);
-                       cout<<"\n \t Does activity "<<b->name<<" has any predecessors ? If yes,how many ? If no,type 0 : ";
-                       inputvalidation(b,e);
-                       b->afters++;
-                       b->after.push_back(current);
-                       allnodes->push_back(b);
-                       int y=1;
-                       pre(b,b->befores,y,allnodes);
-                       current->before.push_back(b);}
-               }
+    while(befores--){
+        node* b=new node();
+        cout<<" \n Input activity "<<current->name<<"'s \n \t Predecessor -"<<k<<"'s name : ";
+        cin>>b->name;
+        bool j=false;
+        node* check;
+        for(auto i : *allnodes){if(i->name==b->name){check=i;j=true;break;}}
+        if(j){
+            char p='n';
+            while(j){
+                char a;
+                if(p=='n'){
+                    cout<<"This name is already taken by another activity.\n\nType N to create a new one or type P to accept that it is the same activity :  ";
+                    cin.ignore();
+                    cin>>a;}
+                else{
+                    a='n';
+                    p='n';
+                    }
+                a=tolower(a);
+                    if(a=='n'){
+                        cout<<" \n Input activity "<<current->name<<"'s \n \t Predecessor -"<<k<<"'s (New) name : ";
+                        cin.ignore();
+                        cin>>b->name;
+                        j=false;
+                        for(auto i : *allnodes){if(i->name==b->name){check=i;j=true;p='n';break;}}
+                        if(!j){
+                            cout<<" \t Duration : ";
+                            inputvalidation(b,l);
+                            cin.clear();
+                                cin.ignore(INT_MAX,'\n');
+                            cout<<"\n \t Does activity "<<b->name<<" has any predecessors ? If yes,how many ? If no,type 0 : ";
+                            inputvalidation(b,e);
+                            b->afters++;
+                            b->after.push_back(current);
+                            allnodes->push_back(b);
+                            int y=1;
+                            pre(b,b->befores,y,allnodes);
+                            current->before.push_back(b);}
+                }
                if(a=='p'){
                    j=false;
                    for(auto i : current->before) if(i->name==check->name){j=true;break;}
@@ -181,17 +181,19 @@ void createoutputfile(vector<node*> *allnodes,vector<vector<node*>> *allpaths,no
         newproject<<"\n"<<"Earliest completion time : "<<x->lf<<"\n";}
     else{
         newproject<<"CREATE DATABASE IF NOT EXISTS "+databasename+";\n";
-        newproject<<"USE "+databasename+"\n";
+        newproject<<"USE "+databasename+";\n";
         newproject<<"CREATE TABLE IF NOT EXISTS "+projectname+"\n";
-        newproject<<"(\n\tActivity varchar(50),\n\tDuration INT,\n\tES INT,\n\tEF INT,\n\tLS INT,\n\tLF INT,\n\tSlack INT,\n\tFirstnode varchar(50),\n\tPredecessor varchar(50),\n\tAfters varchar(50)\n)\n";
+        newproject<<"(\n\tActivity varchar(50),\n\tDuration INT,\n\tES INT,\n\tEF INT,\n\tLS INT,\n\tLF INT,\n\tSlack INT,\n\tFirstnode INT,\n\tPredecessor varchar(50),\n\tAfters varchar(50)\n);\n";
         for(auto k: *allnodes){
             newproject<<"INSERT INTO ";
-            newproject<<projectname<<" VALUES(\'"<<k->name+"\',"<<(k->period)<<","+k->es<<","<<k->ef+","<<k->ls<<","<<k->lf<<","<<k->slack<<","<<k->firstnode<<",";
+            newproject<<projectname<<" VALUES(\'"<<k->name<<"\',"<<k->period<<","<<k->es<<","<<k->ef<<","<<k->ls<<","<<k->lf<<","<<k->slack<<","<<k->firstnode<<",";
             if(k->before.size()){
                 string bef="\'";
                 for(auto s: k->before){
-                    bef+=",";
                     bef+=s->name;
+                    if(s->name!=(k->before).at((k->before).size()-1)->name){
+                        bef+=",";
+                    }
                 }
                 bef+="\'";
                 newproject<<bef;
@@ -203,45 +205,45 @@ void createoutputfile(vector<node*> *allnodes,vector<vector<node*>> *allpaths,no
             if(k->after.size()){
                 string aft="\'";
                 for(auto s: k->after){
-                    aft+=",";
                     aft+=s->name;
+                    if(s->name!=(k->after).at((k->after).size()-1)->name){
+                        aft+=",";
+                    }
                 }
                 aft+="\'";
                 newproject<<aft;
-                newproject<<",";
             }
             else{
                 newproject<<"NULL";
             }
-        newproject<<")\n";
+        newproject<<");\n";
         }
     }
 }
 
 void inputvalidation(node *c,string s){                                                                                                  // to ensure only a valid int value is inputted
-   if(s==l){
-       cin>>c->period;
-       while(!cin.good() || c->period<1)
-   {
-       cout<<"\t\n Invalid Input Try Again!!! Input Must be more than 0 and without chars. \n\n";
-       cin.clear();
-       cin.ignore(INT_MAX,'\n');
-       cout<<s<<" "<<c->name<<" : ";
-       inputvalidation(c,s);
-   }
-   }
-   if(s==e){
-       cin>>c->befores;
-       while(!cin.good() || c->befores<0)
-   {
-       cout<<"\t\n Invalid Input Try Again!!! Input Must be more than 0 and without chars. \n\n";
-       cin.clear();
-       cin.ignore(INT_MAX,'\n');
-       cout<<"For activity "<<c->name<<" "<<s;
-       inputvalidation(c,s);
-   }
-   }
-
+    if(s==l){
+        cin>>c->period;
+        while(!cin.good() || c->period<1)
+    {
+        cout<<"\t\n Invalid Input Try Again!!! Input Must be more than 0 and without chars. \n\n";
+        cin.clear();
+        cin.ignore(INT_MAX,'\n');
+        cout<<s<<" "<<c->name<<" : ";
+        inputvalidation(c,s);
+    }
+    }
+    if(s==e){
+        cin>>c->befores;
+        while(!cin.good() || c->befores<0)
+    {
+        cout<<"\t\n Invalid Input Try Again!!! Input Must be more than 0 and without chars. \n\n";
+        cin.clear();
+        cin.ignore(INT_MAX,'\n');
+        cout<<"For activity "<<c->name<<" "<<s;
+        inputvalidation(c,s);
+    }
+    }
 }
 
 void criticalpath(vector<node*> *allnodes,node* a,vector<vector<node*>> *allpaths,vector<vector<node*>> *criticalpat){                   //to call other funcs to calculate all the values in nodes
@@ -265,7 +267,6 @@ void criticalpath(vector<node*> *allnodes,node* a,vector<vector<node*>> *allpath
            int k=0;
            paths(l,path,a,k,allpaths);
        }}
-
    for(auto pat:*allpaths){
        bool critical = true;
        for(auto act:pat){
