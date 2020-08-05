@@ -6,7 +6,6 @@ Features available :
 1.	Prompts project details and inputs in a recursive manner.
 2.	Calculation of minimum time taken for a project and information in each activity such as Earliest Start time.
 3.	Generates an .sql file that contains SQL query that inserts project details into a server.
-4.	Able to view project saved in table(must use the .JS code).
 
 Requirements:
 1. C++ compiler in Path of machine
